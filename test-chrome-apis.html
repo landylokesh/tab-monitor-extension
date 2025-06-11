@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chrome APIs Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Chrome Extension APIs Test</h1>
+    <p>This page tests if Chrome extension APIs are available and working.</p>
+    
+    <div id="results"></div>
+    
+    <button onclick="testAPIs()">Test Chrome APIs</button>
+    <button onclick="testTabsAPI()">Test Tabs API</button>
+    <button onclick="testWindowsAPI()">Test Windows API</button>
+    <button onclick="clearResults()">Clear Results</button>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function testAPIs() {
+            log('Starting Chrome APIs test...', 'info');
+            
+            // Test basic chrome object
+            if (typeof chrome === 'undefined') {
+                log('❌ Chrome object is not available', 'error');
+                return;
+            }
+            log('✅ Chrome object is available', 'success');
+
+            // Test individual APIs
+            const apis = [
+                'runtime', 'tabs', 'windows', 'storage', 'action'
+            ];
+
+            apis.forEach(api => {
+                if (chrome[api]) {
+                    log(`✅ chrome.${api} is available`, 'success');
+                } else {
+                    log(`❌ chrome.${api} is not available`, 'error');
+                }
+            });
+
+            // Test specific methods
+            const methods = [
+                ['tabs', 'query'],
+                ['tabs', 'get'],
+                ['tabs', 'update'],
+                ['tabs', 'remove'],
+                ['windows', 'getAll'],
+                ['windows', 'get']
+            ];
+
+            methods.forEach(([api, method]) => {
+                if (chrome[api] && chrome[api][method]) {
+                    log(`✅ chrome.${api}.${method} is available`, 'success');
+                } else {
+                    log(`❌ chrome.${api}.${method} is not available`, 'error');
+                }
+            });
+        }
+
+        async function testTabsAPI() {
+            log('Testing Tabs API...', 'info');
+            
+            if (!chrome.tabs || !chrome.tabs.query) {
+                log('❌ Tabs API not available', 'error');
+                return;
+            }
+
+            try {
+                const tabs = await new Promise((resolve, reject) => {
+                    chrome.tabs.query({}, (tabs) => {
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve(tabs);
+                        }
+                    });
+                });
+
+                log(`✅ Successfully retrieved ${tabs.length} tabs`, 'success');
+                log(`<pre>${JSON.stringify(tabs.slice(0, 2), null, 2)}</pre>`, 'info');
+                
+            } catch (error) {
+                log(`❌ Tabs API error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWindowsAPI() {
+            log('Testing Windows API...', 'info');
+            
+            if (!chrome.windows || !chrome.windows.getAll) {
+                log('❌ Windows API not available', 'error');
+                return;
+            }
+
+            try {
+                const windows = await new Promise((resolve, reject) => {
+                    chrome.windows.getAll({ populate: true }, (windows) => {
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve(windows);
+                        }
+                    });
+                });
+
+                log(`✅ Successfully retrieved ${windows.length} windows`, 'success');
+                log(`<pre>${JSON.stringify(windows, null, 2)}</pre>`, 'info');
+                
+            } catch (error) {
+                log(`❌ Windows API error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run basic test on load
+        window.addEventListener('load', () => {
+            setTimeout(testAPIs, 500);
+        });
+    </script>
+</body>
+</html>
