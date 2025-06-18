@@ -1,16 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Tab Monitor",
-  "description": "Comprehensive tab management and monitoring with enhanced data tracking.",
-  "version": "1.1",
+  "name": "Tab Monitor - Clean Up Idle Chrome Tabs",
+  "description": "🧠 Declutter Chrome! Track idle tabs, jump back in, or close the forgotten ones. Stay focused and fast.",
+  "version": "0.1",
   "permissions": [
     "tabs",
     "storage",
     "scripting",
     "idle",
     "windows",
-    "tabGroups",
-    "bookmarks"
+    "tabGroups"
   ],
   "host_permissions": ["<all_urls>"],
   "action": {
